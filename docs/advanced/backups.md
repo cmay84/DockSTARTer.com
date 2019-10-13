@@ -2,6 +2,12 @@
 
 ## Creating backups
 
+There's two kinds of backups.
+
+Overrides and .env get backed up to ~/.config/.compose.backups which is a hidden folder (if you don't see it you need to list hidden folders). This happens automatically and is not optional.
+
+The other type of backup is for the apps config backups discussed below.
+
 DockSTARTer menu has an option for `Backup Config`, or you can use one of `sudo ds -b min` / `sudo ds -b med` / `sudo ds -b max` to create backups.
 
 > Min: Backs up your .env file
@@ -33,9 +39,11 @@ or
 
 Which would make a daily backup at 2 AM.
 
-## Backup retention
+## Backup retention and backup locations
 
-The snapshot backup is created into `${BACKUP_CONFDIR}/<appname>.001`. If the folder `<appname>.001` exists already it is rotated to `<appname>.002` and so on, up to `<appname>.512` by default (this can be adjusted), thereafter it is removed. So if you create one backup per night, for example with a cronjob, then this retention policy gives you 512 days of retention. This is useful but this can require to much disk space, that is why we have included a non-linear distribution policy. In short, we keep only the oldest backup in the range 257-512, and also in the range 129-256, and so on. This exponential distribution in time of the backups retains more backups in the short term and less in the long term; it keeps only 10 or 11 backups but spans a retention of 257-512 days.
+913677
+
+The snapshot backup is created into `${BACKUP_CONFDIR}/<appname>.001` (your backup config is wahtever you set up, the location is mentioned in your .env file if you forget where you saved in in the line:  BACKUP_CONFDIR= in the .env). If the folder `<appname>.001` exists already it is rotated to `<appname>.002` and so on, up to `<appname>.512` by default (this can be adjusted), thereafter it is removed. So if you create one backup per night, for example with a cronjob, then this retention policy gives you 512 days of retention. This is useful but this can require to much disk space, that is why we have included a non-linear distribution policy. In short, we keep only the oldest backup in the range 257-512, and also in the range 129-256, and so on. This exponential distribution in time of the backups retains more backups in the short term and less in the long term; it keeps only 10 or 11 backups but spans a retention of 257-512 days.
 In the following table you can see on each column the different steps of the rotation, where each column shows the current set of snapshots (limited from <appname>.1 to <appname>.16 in this example):
 
 ```bash
@@ -62,6 +70,9 @@ To save more disk space, `rsync` will make hard links for each file of `<appname
 ## Deleting backups
 
 Backups created by DockSTARTer will be protected with a special attribute called `immutable` that makes the backups read only to all users including root. This is done to protect your backups from accidental deletion. Backups will be rotated through retention as described above because the backup script handles the immutable attribute. If you need to delete a backup manually you will first need to remove the immutable attribute from the folder using `sudo chattr -R -i /path/to/backup/<appname>.###`
+
+## Restoring a backup
+There is no automatic restore method from either one, but the general idea is just copy folders back to their original location
 
 ## Credits
 
